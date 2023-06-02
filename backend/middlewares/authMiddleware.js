@@ -1,11 +1,13 @@
 const jwt = require("jsonwebtoken");
 const asyncHandler = require("express-async-handler");
 const User = require("../models/userModel");
+const Blacklist = require("../models/tokenBlacklist");
 require("dotenv").config();
 
 const authMiddleware = asyncHandler(async (req, res, next) => {
-    const token = req.headers.authorization;
-    if (!token) {
+    const token = req.headers?.authorization?.split(" ")[1];
+    const { refreshToken } = req.cookies;
+    if (!token || !refreshToken) {
         res.status(401);
         throw new Error("Please Login to Continue");
     }
@@ -15,6 +17,15 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
         }
         const id = decoded.id;
         const user = await User.findOne({ _id: id });
+        const blacklist = await Blacklist.findOne({ user_id: id });
+        if (blacklist.refreshToken.some((item) => item === refreshToken)) {
+            res.status(401);
+            throw new Error("Login to continue: Refresh token is expired ");
+        }
+        if (blacklist.tokens.some((item) => item === token)) {
+            res.status(401);
+            throw new Error("Login to continue: Provided token is expired");
+        }
         req.user = user;
         next();
     });

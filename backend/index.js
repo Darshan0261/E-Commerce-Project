@@ -1,5 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
+const cors = require("cors");
 require("dotenv").config();
 
 const { dbConnect } = require("./config/dbConnect");
@@ -11,8 +13,16 @@ dbConnect();
 
 const app = express();
 
+app.use(
+    cors({
+        origin: "*",
+    })
+);
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
+app.use(cookieParser());
 
 app.get("/", (req, res) => {
     res.send("E-Commerce Base API Endpoint");
