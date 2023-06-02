@@ -2,6 +2,7 @@ const { default: mongoose } = require("mongoose");
 const { generateToken } = require("../config/jwtToken");
 const User = require("../models/userModel");
 const asyncHandler = require("express-async-handler");
+const validateMongoDbId = require("../utils/validateMongoId");
 
 const createUser = asyncHandler(async (req, res) => {
     const { email } = req.body;
@@ -53,13 +54,13 @@ const getAllUsers = asyncHandler(async (req, res) => {
 });
 
 const updateUser = asyncHandler(async (req, res) => {
-    const { id } = req.params;
+    const { _id } = req.user;
     const updatedUserInfo = req.body;
     if (updatedUserInfo.password) {
         res.status(403);
         throw new Error("Password update not allowed");
     }
-    const updatedUser = await User.findByIdAndUpdate(id, updatedUserInfo, {
+    const updatedUser = await User.findByIdAndUpdate(_id, updatedUserInfo, {
         new: true,
     });
     if (!updatedUser) {
@@ -74,16 +75,19 @@ const updateUser = asyncHandler(async (req, res) => {
 
 const getUser = asyncHandler(async (req, res) => {
     const { id } = req.params;
+    validateMongoDbId(id);
     const user = await User.findOne({ _id: id });
     if (!user) {
         res.status(404);
         throw new Error("User Not Found");
     }
-    res.send(user);
+    const { password, ...userInfo } = user._doc;
+    res.send(userInfo);
 });
 
 const deleteUser = asyncHandler(async (req, res) => {
     const { id } = req.params;
+    validateMongoDbId(id);
     const deletedUser = await User.findByIdAndDelete(id);
     if (!deletedUser) {
         res.status(404);
@@ -93,6 +97,38 @@ const deleteUser = asyncHandler(async (req, res) => {
     res.send(deletedUser);
 });
 
+const blockUser = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    validateMongoDbId(id);
+    const user = await User.findOne({ _id: id });
+    if (!user) {
+        res.status(404);
+        throw new Error("User Not Found");
+    }
+    user.isBlocked = true;
+    await user.save();
+    res.json({
+        message: "Usere Blocked Sucessfully",
+        sucess: true,
+    });
+});
+
+const unblockUser = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    validateMongoDbId(id);
+    const user = await User.findOne({ _id: id });
+    if (!user) {
+        res.status(404);
+        throw new Error("User Not Found");
+    }
+    user.isBlocked = false;
+    await user.save();
+    res.json({
+        message: "Usere Blocked Sucessfully",
+        sucess: true,
+    });
+});
+
 module.exports = {
     createUser,
     loginUser,
@@ -100,4 +136,6 @@ module.exports = {
     getUser,
     deleteUser,
     updateUser,
+    blockUser,
+    unblockUser,
 };
