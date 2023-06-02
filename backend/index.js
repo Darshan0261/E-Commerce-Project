@@ -2,16 +2,20 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const morgan = require("morgan");
 require("dotenv").config();
 
 const { dbConnect } = require("./config/dbConnect");
 const authRouter = require("./routes/authRoutes");
+const productRouter = require("./routes/productRoutes");
 const { notFound, errorHandler } = require("./middlewares/errorHandler");
 const PORT = process.env.PORT || 4000;
 
 dbConnect();
 
 const app = express();
+
+app.use(morgan("dev"));
 
 app.use(
     cors({
@@ -29,6 +33,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/user", authRouter);
+app.use("/api/product", productRouter);
 
 app.use(notFound);
 app.use(errorHandler);
