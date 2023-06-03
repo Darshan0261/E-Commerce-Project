@@ -4,6 +4,8 @@ const Blacklist = require("../models/tokenBlacklist");
 const asyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const validateMongoDbId = require("../utils/validateMongoId");
+const sendEmail = require("./emailCtrl");
+const crypto = require("crypto");
 
 // Create a new User.
 const createUser = asyncHandler(async (req, res) => {
@@ -199,6 +201,69 @@ const userLogout = asyncHandler(async (req, res) => {
     return res.sendStatus(204);
 });
 
+// Update password step - 1.
+// const updatePassword = asyncHandler(async (req, res) => {
+//     const { _id } = req.user;
+//     const { password } = req.body;
+//     validateMongoDbId(_id);
+//     const user = await User.findById(_id);
+//     user.password = password;
+//     await user.save();
+//     res.json({
+//         message: "Password Updated Sucessfully",
+//         success: true,
+//     });
+// });
+
+// Update password. Send email and get token.
+const forgotPasswordToken = asyncHandler(async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) throw new Error("Email and Password Required");
+        const user = await User.findOne({ email });
+        if (!user) throw new Error(`User with email: ${email} not found.`);
+        const resetToken = await user.createPasswordResetToken();
+        user.tempPassword = password;
+        await user.save();
+        const resetURL = `Hi, Please follow this link to reset your password. This link is valid till 10 minutes from now. <a href="${req.protocol}://${req.hostname}:5000/api/user/reset-password/${resetToken}" >Click Here.</a>`;
+        const data = {
+            to: email,
+            text: "Reset Password",
+            subject: "Password Reset Link",
+            html: resetURL,
+        };
+        await sendEmail(data);
+        res.json({
+            message: "Reset password email sent",
+            success: true,
+            token: resetToken,
+        });
+    } catch (error) {
+        throw new Error(error);
+    }
+});
+
+// Link sent to user email. Password reset handler.
+const resetPassword = asyncHandler(async (req, res) => {
+    let { token } = req.params;
+    token = crypto.createHash("sha256").update(token).digest("hex");
+    const user = await User.findOne({
+        passwordResetToken: token,
+        passwordResetExpires: { $gt: Date.now() },
+    });
+    if (!user) throw new Error("Reset Link Expired. Please try again later");
+    user.password = user.tempPassword;
+    this.tempPassword = undefined;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    user.passwordChangedAt = Date.now();
+    await user.save();
+    res.json({
+        message: "Password Reset",
+        success: true,
+    });
+});
+
 module.exports = {
     createUser,
     loginUser,
@@ -210,4 +275,7 @@ module.exports = {
     unblockUser,
     handleRefreshToken,
     userLogout,
+    // updatePassword,
+    forgotPasswordToken,
+    resetPassword,
 };

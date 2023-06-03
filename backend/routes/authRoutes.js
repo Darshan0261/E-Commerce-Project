@@ -11,6 +11,9 @@ const {
     unblockUser,
     handleRefreshToken,
     userLogout,
+    updatePassword,
+    forgotPasswordToken,
+    resetPassword,
 } = require("../controllers/userCtrl");
 const { authMiddleware, isAdmin } = require("../middlewares/authMiddleware");
 
@@ -37,6 +40,15 @@ router.delete("/:id", deleteUser);
 
 // Update User Profile.
 router.patch("/edit", authMiddleware, updateUser);
+
+// Update User Password
+// router.patch("/password", authMiddleware, updatePassword);
+
+// Send forgot password link to user via email and get token.
+router.post("/forgot-password-token", authMiddleware, forgotPasswordToken);
+
+// Sent link - reset password
+router.get("/reset-password/:token", resetPassword);
 
 // Block specific user.
 router.patch("/block-user/:id", authMiddleware, isAdmin, blockUser);
