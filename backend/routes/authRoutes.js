@@ -42,10 +42,10 @@ router.delete("/:id", deleteUser);
 router.patch("/edit", authMiddleware, updateUser);
 
 // Update User Password
-// router.patch("/password", authMiddleware, updatePassword);
+router.patch("/password", authMiddleware, updatePassword);
 
 // Send forgot password link to user via email and get token.
-router.post("/forgot-password-token", authMiddleware, forgotPasswordToken);
+router.post("/forgot-password-token", forgotPasswordToken);
 
 // Sent link - reset password
 router.get("/reset-password/:token", resetPassword);

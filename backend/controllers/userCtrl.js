@@ -202,18 +202,18 @@ const userLogout = asyncHandler(async (req, res) => {
 });
 
 // Update password step - 1.
-// const updatePassword = asyncHandler(async (req, res) => {
-//     const { _id } = req.user;
-//     const { password } = req.body;
-//     validateMongoDbId(_id);
-//     const user = await User.findById(_id);
-//     user.password = password;
-//     await user.save();
-//     res.json({
-//         message: "Password Updated Sucessfully",
-//         success: true,
-//     });
-// });
+const updatePassword = asyncHandler(async (req, res) => {
+    const { _id } = req.user;
+    const { password } = req.body;
+    validateMongoDbId(_id);
+    const user = await User.findById(_id);
+    user.password = password;
+    await user.save();
+    res.json({
+        message: "Password Updated Sucessfully",
+        success: true,
+    });
+});
 
 // Update password. Send email and get token.
 const forgotPasswordToken = asyncHandler(async (req, res) => {
@@ -275,7 +275,7 @@ module.exports = {
     unblockUser,
     handleRefreshToken,
     userLogout,
-    // updatePassword,
+    updatePassword,
     forgotPasswordToken,
     resetPassword,
 };
