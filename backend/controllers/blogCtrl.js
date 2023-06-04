@@ -15,7 +15,9 @@ const createBlog = asyncHandler(async (req, res) => {
 
 const getaBlog = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const blog = await Blog.findById(id);
+    const blog = await Blog.findById(id)
+        .populate({ path: "likes", select: "-password" })
+        .populate({ path: "dislikes", select: "-password" });
     if (!blog) {
         res.status(404);
         throw new Error("Blog Not Found");

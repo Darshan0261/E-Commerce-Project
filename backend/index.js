@@ -7,7 +7,9 @@ require("dotenv").config();
 
 const { dbConnect } = require("./config/dbConnect");
 const authRouter = require("./routes/authRoutes");
+const blogCategoryRouter = require("./routes/blogCategoryRoutes");
 const blogRouter = require("./routes/blogRoutes");
+const prodCategoryRouter = require("./routes/prodCategoryRoutes");
 const productRouter = require("./routes/productRoutes");
 const { notFound, errorHandler } = require("./middlewares/errorHandler");
 const PORT = process.env.PORT || 4000;
@@ -33,9 +35,11 @@ app.get("/", (req, res) => {
     res.send("E-Commerce Base API Endpoint");
 });
 
-app.use("/api/user", authRouter);
-app.use("/api/product", productRouter);
+app.use("/api/blog-category", blogCategoryRouter);
 app.use("/api/blog", blogRouter);
+app.use("/api/product-category", prodCategoryRouter);
+app.use("/api/product", productRouter);
+app.use("/api/user", authRouter);
 
 app.use(notFound);
 app.use(errorHandler);
