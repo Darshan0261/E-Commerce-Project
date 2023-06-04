@@ -1,5 +1,14 @@
 const mongoose = require("mongoose");
 
+const ratingSchema = new mongoose.Schema(
+    {
+        star: { type: Number, min: 0, max: 5 },
+        comment: String,
+        postedBy: { type: mongoose.Types.ObjectId, ref: "User" },
+    },
+    { _id: false }
+);
+
 const ProductSchema = new mongoose.Schema(
     {
         title: {
@@ -42,12 +51,11 @@ const ProductSchema = new mongoose.Schema(
             default: 0,
         },
         images: Array,
-        ratings: [
-            {
-                star: { type: Number, min: 0, max: 5 },
-                postedBy: { type: mongoose.Types.ObjectId, ref: "User" },
-            },
-        ],
+        ratings: [ratingSchema],
+        totalRating: {
+            type: String,
+            default: 0,
+        },
     },
     { timestamps: true }
 );

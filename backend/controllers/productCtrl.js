@@ -145,12 +145,12 @@ const addToWishlist = asyncHandler(async (req, res) => {
 
 const rateProduct = asyncHandler(async (req, res) => {
     const { _id } = req.user;
-    const { star, prodId } = req.body;
+    const { star, prodId, comment } = req.body;
     if (!star || !prodId) {
         res.status(400);
         throw new Error("Product Id and star required.");
     }
-    const product = await Product.findById(prodId);
+    let product = await Product.findById(prodId);
     if (!product) {
         res.status(404);
         throw new Error("Product Not Found");
@@ -159,33 +159,43 @@ const rateProduct = asyncHandler(async (req, res) => {
         (rate) => rate.postedBy.toString() === _id.toString()
     );
     if (alreadyRated) {
-        const updatedRatingProduct = await Product.findOneAndUpdate(
+        product = await Product.findOneAndUpdate(
             { _id: prodId, "ratings.postedBy": _id },
-            { $set: { "ratings.$.star": star } },
+            { $set: { "ratings.$.star": star, "ratings.$.comment": comment } },
             { new: true }
         );
-        return res.json({
-            message: "Rating Updated",
-            success: true,
-            updatedRatingProduct,
-        });
-    }
-    const ratedProduct = await Product.findByIdAndUpdate(
-        prodId,
-        {
-            $push: {
-                ratings: {
-                    star: star,
-                    postedBy: _id,
+    } else {
+        product = await Product.findByIdAndUpdate(
+            prodId,
+            {
+                $push: {
+                    ratings: {
+                        star: star,
+                        comment: comment,
+                        postedBy: _id,
+                    },
                 },
             },
+            { new: true }
+        );
+    }
+
+    const totalRatings = product.ratings.length;
+    const sumRatings = product.ratings.reduce((pre, cur) => {
+        return pre + cur.star;
+    }, 0);
+    const rating = sumRatings / totalRatings;
+    product = await Product.findByIdAndUpdate(
+        prodId,
+        {
+            totalRating: rating,
         },
         { new: true }
     );
-    res.json({
-        message: "Rated Product Successfully",
+    return res.json({
+        message: "Rated Product Sucessfully",
         success: true,
-        ratedProduct,
+        product,
     });
 });
 
