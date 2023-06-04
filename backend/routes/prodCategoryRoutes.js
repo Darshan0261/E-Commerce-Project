@@ -12,7 +12,7 @@ const { authMiddleware, isAdmin } = require("../middlewares/authMiddleware");
 router.post("/", authMiddleware, isAdmin, createCategory);
 router.get("/", getAllCategory);
 router.get("/:id", getaCategory);
-router.patch("/", authMiddleware, isAdmin, updateCategory);
+router.patch("/:id", authMiddleware, isAdmin, updateCategory);
 router.delete("/:id", authMiddleware, isAdmin, deleteCategory);
 
 module.exports = router;
