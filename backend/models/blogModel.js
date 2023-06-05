@@ -33,6 +33,7 @@ const blogSchema = new mongoose.Schema({
         type: String,
         default: "Admin",
     },
+    images: Array,
 });
 
 const BlogModel = mongoose.model("blog", blogSchema);

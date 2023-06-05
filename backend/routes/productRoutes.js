@@ -9,13 +9,29 @@ const {
     deleteProduct,
     addToWishlist,
     rateProduct,
+    uploadImages,
 } = require("../controllers/productCtrl");
 
 const { authMiddleware, isAdmin } = require("../middlewares/authMiddleware");
+const {
+    uploadPhoto,
+    productImgResize,
+} = require("../middlewares/uploadImages");
+const productIdValidator = require("../middlewares/productIdValidator");
 
 router.post("/", authMiddleware, isAdmin, createProduct);
 
 router.get("/", getAllProducts);
+
+router.put(
+    "/upload-images/:id",
+    authMiddleware,
+    isAdmin,
+    productIdValidator,
+    uploadPhoto.array("images", 10),
+    productImgResize,
+    uploadImages
+);
 
 router.put("/wishlist", authMiddleware, addToWishlist);
 

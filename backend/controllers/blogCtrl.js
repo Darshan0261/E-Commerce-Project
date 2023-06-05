@@ -1,7 +1,8 @@
 const Blog = require("../models/blogModel");
-const User = require("../models/userModel");
+const cloudinaryUploadImg = require("../utils/cloudinary");
 const validateMongoDbId = require("../utils/validateMongoId");
 const asyncHandler = require("express-async-handler");
+const fs = require("fs");
 
 const createBlog = asyncHandler(async (req, res) => {
     const payload = req.body;
@@ -179,6 +180,32 @@ const dislikeBlog = asyncHandler(async (req, res) => {
     }
 });
 
+const uploadImages = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    validateMongoDbId(id);
+    const uploader = (path) => cloudinaryUploadImg(path, "images");
+    const urls = [];
+    const files = req.files;
+    for (const file of files) {
+        const { path } = file;
+        const newPath = await uploader(path);
+        urls.push(newPath);
+        fs.unlinkSync(path);
+    }
+    const updatedBlog = await Blog.findByIdAndUpdate(
+        id,
+        {
+            $addToSet: { images: { $each: urls } },
+        },
+        { new: true }
+    );
+    res.json({
+        message: "Images Uploaded",
+        success: true,
+        updatedBlog,
+    });
+});
+
 module.exports = {
     createBlog,
     updateBlog,
@@ -187,4 +214,5 @@ module.exports = {
     deleteBlog,
     likeBlog,
     dislikeBlog,
+    uploadImages,
 };

@@ -1,8 +1,10 @@
+const fs = require("fs");
 const Product = require("../models/productModel");
 const User = require("../models/userModel");
 const asyncHandler = require("express-async-handler");
 const validateMongoDbId = require("../utils/validateMongoId");
 const { default: slugify } = require("slugify");
+const cloudinaryUploadImg = require("../utils/cloudinary");
 
 const createProduct = asyncHandler(async (req, res) => {
     const payload = req.body;
@@ -199,6 +201,32 @@ const rateProduct = asyncHandler(async (req, res) => {
     });
 });
 
+const uploadImages = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    validateMongoDbId(id);
+    const uploader = (path) => cloudinaryUploadImg(path, "images");
+    const urls = [];
+    const files = req.files;
+    for (const file of files) {
+        const { path } = file;
+        const newPath = await uploader(path);
+        urls.push(newPath.url);
+        fs.unlinkSync(path);
+    }
+    const updatedProduct = await Product.findByIdAndUpdate(
+        id,
+        {
+            $addToSet: { images: { $each: urls } },
+        },
+        { new: true }
+    );
+    res.json({
+        message: "Images Uploaded",
+        success: true,
+        updatedProduct,
+    });
+});
+
 module.exports = {
     createProduct,
     getaProduct,
@@ -207,4 +235,5 @@ module.exports = {
     deleteProduct,
     addToWishlist,
     rateProduct,
+    uploadImages,
 };
