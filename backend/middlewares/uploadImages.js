@@ -60,15 +60,26 @@ const productImgResize = asyncHandler(async (req, res, next) => {
 
 const blogImgResize = asyncHandler(async (req, res, next) => {
     if (!req.files) return next();
-    await Promise.all(
+
+    req.files = await Promise.all(
         req.files.map(async (file) => {
+            const resizedFilePath = `public/images/blogs/${file.filename}`;
             await sharp(file.path)
-                .resize(300, 300)
                 .toFormat("jpeg")
                 .jpeg({ quality: 90 })
-                .toFile(`public/images/blogs/${file.filename}`);
+                .toFile(resizedFilePath);
+
+            // Return the updated file object
+
+            fs.unlinkSync(file.path);
+
+            return {
+                ...file,
+                path: resizedFilePath,
+            };
         })
     );
+
     next();
 });
 

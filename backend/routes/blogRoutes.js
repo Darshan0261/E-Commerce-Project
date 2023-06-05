@@ -15,7 +15,7 @@ const {
 const { authMiddleware, isAdmin } = require("../middlewares/authMiddleware");
 
 const blogIdValidator = require("../middlewares/blogIdValidator");
-const { uploadPhoto } = require("../middlewares/uploadImages");
+const { uploadPhoto, blogImgResize } = require("../middlewares/uploadImages");
 
 router.get("/", getAllBlog);
 router.get("/:id", getaBlog);
@@ -29,6 +29,7 @@ router.put(
     isAdmin,
     blogIdValidator,
     uploadPhoto.array("images", 2),
+    blogImgResize,
     uploadImages
 );
 
