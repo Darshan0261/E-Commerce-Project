@@ -252,6 +252,7 @@ const addToWishlist = asyncHandler(async (req, res) => {
     }
 });
 
+// Get a wishlist
 const getWishlist = asyncHandler(async (req, res) => {
     const { wishlist } = req.user;
     res.json(wishlist);
@@ -306,6 +307,22 @@ const resetPassword = asyncHandler(async (req, res) => {
     });
 });
 
+const saveAddress = asyncHandler(async (req, res) => {
+    const { _id } = req.user;
+    const { address } = req.body;
+    if (!address) {
+        res.status(400);
+        throw new Error("Address is required.");
+    }
+    await User.findByIdAndUpdate(_id, {
+        address: address,
+    });
+    res.json({
+        message: "Address added.",
+        success: true,
+    });
+});
+
 module.exports = {
     createUser,
     loginUser,
@@ -322,4 +339,5 @@ module.exports = {
     resetPassword,
     addToWishlist,
     getWishlist,
+    saveAddress,
 };

@@ -16,6 +16,7 @@ const {
     resetPassword,
     addToWishlist,
     getWishlist,
+    saveAddress,
 } = require("../controllers/userCtrl");
 const { authMiddleware, isAdmin } = require("../middlewares/authMiddleware");
 
@@ -39,6 +40,9 @@ router.get("/wishlist", authMiddleware, getWishlist);
 
 // Add product to Wishlist
 router.put("/wishlist", authMiddleware, addToWishlist);
+
+// Add User Address
+router.put("/address", authMiddleware, saveAddress);
 
 // Get sepcific user info.
 router.get("/:id", getUser);
