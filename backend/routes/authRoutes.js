@@ -14,6 +14,8 @@ const {
     updatePassword,
     forgotPasswordToken,
     resetPassword,
+    addToWishlist,
+    getWishlist,
 } = require("../controllers/userCtrl");
 const { authMiddleware, isAdmin } = require("../middlewares/authMiddleware");
 
@@ -31,6 +33,12 @@ router.get("/refresh-token", handleRefreshToken);
 
 // User Logout Handler.
 router.get("/logout", authMiddleware, userLogout);
+
+// Get a Wishlist
+router.get("/wishlist", authMiddleware, getWishlist);
+
+// Add product to Wishlist
+router.put("/wishlist", authMiddleware, addToWishlist);
 
 // Get sepcific user info.
 router.get("/:id", getUser);

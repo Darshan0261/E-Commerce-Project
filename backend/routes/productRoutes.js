@@ -7,7 +7,6 @@ const {
     getaProduct,
     editProduct,
     deleteProduct,
-    addToWishlist,
     rateProduct,
     uploadImages,
 } = require("../controllers/productCtrl");
@@ -32,8 +31,6 @@ router.put(
     productImgResize,
     uploadImages
 );
-
-router.put("/wishlist", authMiddleware, addToWishlist);
 
 router.put("/rate", authMiddleware, rateProduct);
 

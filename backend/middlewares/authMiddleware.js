@@ -17,7 +17,9 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
                 throw new Error(err);
             }
             const id = decoded.id;
-            const user = await User.findOne({ _id: id });
+            const user = await User.findOne({ _id: id })
+                .select("-password")
+                .populate("wishlist");
             const blacklist = await Blacklist.findOne({ user_id: id });
             if (blacklist.refreshTokens.some((item) => item === refreshToken)) {
                 res.status(401);

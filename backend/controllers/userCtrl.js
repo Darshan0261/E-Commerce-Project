@@ -215,6 +215,48 @@ const updatePassword = asyncHandler(async (req, res) => {
     });
 });
 
+// Add to Wishlist
+const addToWishlist = asyncHandler(async (req, res) => {
+    const { _id } = req.user;
+    const { prodId } = req.body;
+    const user = await User.findById(_id);
+    const isAlreadyAdded = user.wishlist.some(
+        (id) => prodId.toString() === id.toString()
+    );
+    if (isAlreadyAdded) {
+        const user = await User.findByIdAndUpdate(
+            _id,
+            {
+                $pull: { wishlist: prodId },
+            },
+            { new: true }
+        ).select("-password");
+        return res.json({
+            message: "Product Removed from wishlist",
+            success: true,
+            user,
+        });
+    } else {
+        const user = await User.findByIdAndUpdate(
+            _id,
+            {
+                $push: { wishlist: prodId },
+            },
+            { new: true }
+        ).select("-password");
+        return res.json({
+            message: "Product Added to wishlist",
+            success: true,
+            user,
+        });
+    }
+});
+
+const getWishlist = asyncHandler(async (req, res) => {
+    const { wishlist } = req.user;
+    res.json(wishlist);
+});
+
 // Update password. Send email and get token.
 const forgotPasswordToken = asyncHandler(async (req, res) => {
     try {
@@ -278,4 +320,6 @@ module.exports = {
     updatePassword,
     forgotPasswordToken,
     resetPassword,
+    addToWishlist,
+    getWishlist,
 };
