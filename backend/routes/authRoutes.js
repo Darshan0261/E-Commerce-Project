@@ -14,11 +14,15 @@ const {
     updatePassword,
     forgotPasswordToken,
     resetPassword,
-    addToWishlist,
-    getWishlist,
     saveAddress,
 } = require("../controllers/userCtrl");
 const { authMiddleware, isAdmin } = require("../middlewares/authMiddleware");
+
+const cartRouter = require("./cartRoutes");
+const wishlistRouter = require("./authRoutes/wishlistRouter");
+
+router.use("/cart", cartRouter);
+router.use("/wishlist", wishlistRouter);
 
 // Register / Signup user.
 router.post("/register", createUser);
@@ -34,12 +38,6 @@ router.get("/refresh-token", handleRefreshToken);
 
 // User Logout Handler.
 router.get("/logout", authMiddleware, userLogout);
-
-// Get a Wishlist
-router.get("/wishlist", authMiddleware, getWishlist);
-
-// Add product to Wishlist
-router.put("/wishlist", authMiddleware, addToWishlist);
 
 // Add User Address
 router.put("/address", authMiddleware, saveAddress);
